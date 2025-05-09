@@ -1,94 +1,134 @@
-# Starterkode ING301 Prosjekt - Del A: Part A: Domenemodell og Basisfunksjonalitet
+# ING301 prosjekt - Del D
+
+I del D av prosjektet skal dere implementere klient-applikasjoner som bruker REST API for SmartHus sky-tjenesten som dere implementerte i Del C. Konkret skal det implementeres:
+
+- en *dashboard (klient) applikasjon* som gjør det mulig å hente målinger fra sensorer og sette tilstanden på aktuatorer
+- et *smarthus (klient) applikasjon* som simulerer de fysisk sensorer og aktuatorer i smarthuset og som sender målinger for sensorer og henter tilstand for aktuatorer 
+
+Dashboardet og smarthus applikajsonen skal kommuniserere med hverandre ved å bruke endepunktene i REST API'et for sky-tjenesten.
+
+## Setup og startkode
+
+Start-koden for prosjektet finnes i dette github repository: 
+
+https://github.com/selabhvl/ing301-projectpartD-startcode.git
+
+some kan brukes som mal (**Use as Template**) som dere har gjort med startkode tidligere.
+
+Startkoden inneholder egne klasser for aktuatorer og sensorer på klient-siden og er dermed _"uavhengig"_ av selve `smarthouse` systemet.  
+
+Kodebasen for start-koden dekker altså bare klientene, og det forutsettes at en ferdig utviklet løsning av REST-APIet som beskrevet i 
+del C er utviklet. Dere kan bruker deres egen løsning eller bruke vårt løsningsforslag:
+Når dere sjekker ut dette prosjektet (etter å ha laget repository basert på templaten) kan dere enten plasere  det i en helt ny mapper, eller dere kan også legger det inn i deres eksisterende prosjekt (som [submodul](https://git-scm.com/book/en/v2/Git-Tools-Submodules)) og legge det ved siden av `smarthouse`-mappen, f.eks. i en mappe som heter `client`.
+
+```bash
+cd <smarthouse prosjekt>
+git clone <part D repository> client
+cd client
+```
+
+
+Husk at skytjenesten må kjøres i bakgrunnen (lytter på en port for HTTP forbindelser) for at de to klient-applikasjoner skal kunne kommunisere.
+
+Som en forenkling av oppgaven skal vi kun fokusere på kontroll av to enheter fra demo smarthuset:
+
+- Sensor: Temperatursensor (f.eks. uuid=`4d8b1d62-7921-4917-9b70-bbd31f6e2e8e`)
+- Aktuator: Lyspære (LightBulb) (f.eks. uuid=`6b1c5f6b-37f6-4e3d-9145-1cfbe2f1fc28`)
+
+Dere skal bruke [requests-biblioteket](https://requests.readthedocs.io/en/latest/) for å implementere bruk av REST API fra klient-applikasjonene.
+
+## Dashboard klient-applikasjon
+ 
+Start-koden for en dashboard applikasjonen med grensesnitt implementert ved bruk av [tkinter](https://docs.python.org/3/library/tkinter.html) finnes i filene `dashboard.py`, `dashboard_lightbulb.py`, samt `dashboard_temperaturesensor.py`. 
+
+Dashboard-applikasjonen startes ved å kjøre Python-scriptet `dashboard.py` og grensesnittet ser ut som vist nedenfor:
+
+<img src="assets/dashboard.png" alt= “” width="300">
+
+### For Mac-brukere
 
 > [!NOTE]
-> Du kan gjerne fjerne innholdet i denne filen og skrive din egen dokumentasjon av SmartHus-applikasjonen i denne [README.md](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-readmes) filen  etter at du har laget din kopi at dette repository!
+> For dere som bruker Mac OS X (og kanskje noen Linux distribusjoner) også vil dere sannsynligvis får en feilmelding som 
+> ```
+> ModuleNotFoundError: No module named '_tkinter'
+> ```
+> Dette er fordi at bibioteket som brukes for disse applikasjoner _TKinter_ ikke som standard er del av Python installasjoner
+> under Mac OS. Du må derfor eksplisitt installere denne. 
+> Den anbefalte måten er å bruke [Homebrew](https://brew.sh/) for dette. Hvis du ikke har Homebrew fra før av så må du installere den først før du kan kjøre:
+> ```
+> brew install python-tk@3.9
+> ```
+> Du leser riktig: Du bør bruke Python 3.9 siden nyere versjoner av Python er litt ustabilit i forhold til Tkinter. 
+> Når Python 3.9 med TKinter er installert lager du en virtual environment:
+> ```bash
+> python3.9 -m venv .venv
+> source .venv/bin/activate
+> python -V # -> burde viser 3.9...
+> ```
+> i det virtuelle miljøet installerer du `requests` og så kan du starte dashbordet:
+> ```bash
+> pip install requests 
+> python dashboard.py
+> ```
 
+## Oppgavebeskrivelse
 
-## Steg 1: Utsjekk og 'kom i gang'
+## Dashboard klient-applikasjon
 
-**OBS! Det er bare en per gruppe som må utføre dette:**
+Følgende skal implementeres:
 
-Trykk på "Use this template".
-Velg første opsjon "Create a new repository".
-Du kommer til en ny side.
-Her skal du gi repo'en et godt navn, f.eks. noe somm inneholder ing301 og ditt gruppenummer.
+- I filen `dashboard_lightbulb.py` skal dere implementere metoden `lightbulb_cmd` som blir utført når brukeren velger `On` eller `Off` knappene som skal skal sette tilstanden på lyspæren via sky-tjenesten.
 
-![Skjermbilde: Hvordan man lager et nytt repository basert på en templat på GitHub](https://raw.githubusercontent.com/selabhvl/ing301public/main/resources/images/skjermbildet-template-repo.jpg)
+- I filen `dashboard_temperaturesensor.py` skal dere implementere metoden `refresh_btn_cmd` som kalles når brukeren trykker på `Refresh`-knappen og som skal hente temperaturen fra sky-tjenesten for temperatursensoren. 
 
-Dere kan velge om repo skal være public eller private.
-For at de andre gruppemedlemmer kunne _pushe_ til din repo må du legge dem til med `Write`-rettigheter.
-Detter gjør du når du går til hovedsiden (dvs. `https://github.com/{ditt brukernavn}/{ditt valgte repo navn}`) og så på "Settings" > "Collaborators and teams" > "Add people":
-Du kan søke opp de andre med deres GitHub brukernavn eller epost.
-Hvis dere har valg å ha deres repo privat må dere legge til [faglæreren](https://github.com/webminz) i dette repo med `Read`-rettigheter også.
+I filen `messaging.py` finnes klassene `SensorMeasurement` og `ActuatorState` med metoder som kan brukes for å konstruere body/payload i de requests som skal sendes til sky-tjenesten. 
 
-![Skjermbilde: Hvordan man legger til medlemmer i et repository på GitHub](https://raw.githubusercontent.com/selabhvl/ing301public/main/resources/images/screenshot-github-collaborators.png)
+I eksempler fra forelesninger med REST web-tjenseter finnes der også eksempler på bruk av `requests`-modulet.
 
-Når tilgangene er på plass kan alle i gruppen ssjekke ut koden på vanlig måte.
-Trykk på "Code" på hovedsiden og så kopierer du URLen.
-I GitHub Dekstop på venstre siden trykker du på "Add" > "Clone Repository" og så limer du inn URLen.
-Da vil du få lastet ned koden lokalt og du kan begynne med prosjektet.
-Vi anbefaler at du åpner prosjektet i VS Code eller PyCharm som du hadde gjort med oppvarmingsoppgaven.
+https://github.com/selabhvl/ing301public/tree/main/examples/12_restapi_webservices
 
-## Steg 2: Mappestruktur
+## Smarthus klient-applikasjon
 
-Når dere åpner prosjektet vil dere se følgende mappestruktur:
+Start-koden for en smarthus applikasjonen som skal simulere de fysiske enheter i et smarthus finnes i filene `smarthouse.py`, `smarthouse_lightbulb.py`, samt `smarthouse_temperaturesensor.py`. 
 
-```
-.
-├── README.md
-├── domainmodel.[..]      <--- Her skal dere legger dere klassediagrammet dere har tegnet
-├── .gitignore
-├── .github
-│  └── workflows
-│     └── check-assignment-code.yaml
-├── .git
-│  └── ...
-├── smarthouse
-│  ├── __init__.py
-│  └── domain.py          <--- Her skal dere legger inn deres klasser og utvide den eksisterende koden
-└── tests
-   ├── __init__.py
-   ├── demo_house.py      <--- Her skal dere bygge opp "demohuset" ved å bruke deres klasser
-   └── test_part_a.py     <--- Målet til slutt er å få alle tester her til å bli "grønn"
-```
+Smarthus-applikasjonen startes ved å kjøre Python-scriptet `smarthus.py` Dette programmet skriver output i shell`en.
 
-De _fire_ relevante plassene i denne mappestrukturen er markert med kommentarer.
+Følgende skal implementeres:
 
-## Steg 3: Sett i gang 
+- I filen `smarthouse_lightbulb.py` skal dere i `Actuator`-klassen implementere metoden `client` som skal hente tilstand for aktuatoren fra sky-tjenesten med et passende antall sekunders intervall. Videre skal dere implementere `run`-metoden som skal start en ny tråd som kjører `simulator`-metoden og en tråd som kjører `client`-metoden.
 
-**For mange blir det sikkert første gang at dere utvikler et større programvaresystem. Det er viktig _"en dyp pust inn"_ før dere
-setter i gang. For å ikke bli overveldet, har vi lagt en steg-for-steg oppskrift hvordan denne oppgaven skal løses:**
+- I filen `smarthouse_temperature.py` skal dere i `Sensor`-klassen implementere metoden `client` som skal levere temperaturen til sky-tjenesten med passende antall sekunders intervall. Videre skal dere implementere `run`-metoden som skal start en ny tråd som kjører `simulator`-metoden og en tråd som kjører `client`-metoden.
 
-1. Begynn med å lese nøye gjennom [Problembeskrivelsen](https://github.com/selabhvl/ing301public/blob/main/project/index.md) og lag deretter en _domenemodell_ (klassediagramm) av det hele.
-   Du skal lage forskjellige klasser for de foskjellige enhetene. Inkluder også de klassene som allerede finnes i `smarthouse/domain.py`.
-   Du kan tegne klassedigramm enten på ark/whiteboard (husk å scanne det etterpå eller ta bildet) eller et grafisk verktøy som [diagrams.net](https://www.diagrams.net/) eller [Figma](https://www.figma.com/).
-   Klassediagrammet skal lagres enten som PDF eller bildefil (`.jpg`, `.png`, `.svg`) og lastes opp i roten til repo'en med navn `domainmodel.<filtype>` (dette skal være deres første egen commit!). 
-2. I neste steg skal klassediagrammet dere har laget oversettes til konkrete klasser i Python ved å utvide `smarthouse/domain.py` filen. 
-   Dere betyr at dere skal legge til klasser som representer rom, etasjer og de forskjellige type enheter. 
-   Tenk på hva slags attributter (dvs. de som settes i konstruktor: `__init__`-funskjonen) og _metodene_ (funksjoner innen en klasse) hver enkelt klasse trenger.
-3. Som neste steg anbefaler vi at dere tar en kikk på klassen `SmartHouse` i `smarthouse/domain.py`: Her finner dere en rekke funksjoner som mangler en korrekt implementasjon.
-    Deres oppgave er å skrive funksjonaliteten til hver enkelt funksjon som det er beskrevet i kommentaren ved å bruke deres nylagte klasser.
-4. Etterpå kan dere begynne å legge inn et "Demo Hus" som er beskrevet på [denne siden](https://github.com/selabhvl/ing301public/blob/main/project/demo.md). Dette skal gjøres i files `tests/demo_house.py`
-    ved å bruke de forskjellige `register_`-funskjonene i `SmartHouse` som dere har nettop implementert. 
-5. Til slutt gjenstår det å få alle tester i `tests/test_part_a.py` til å bestå. Sjekk implementasjonskravene nedenfor for å sjekke 
-    om dere eventuelt trenger å utvide klassene deres om noen attributter eller metoder. 
+`Sensor` og `Actuator`-klassen følger den samme modellen ved å ha en `client`-metode som kjører i en tråd og ivaretar kommunikasjon med sky-tjenesten og en `simulator`-metode som kjører i en annen tråd og simulerer den fysisks enheten som ligger til grunn.
 
+Denne tutorial inneholder en mer grunnleggende introduksjon til tråd-programmering:
 
-### Implementasjonskrav
+https://superfastpython.com/threading-in-python/ 
 
-I de gitte Unit-testene forventes det at objekter som representerer enheter tilbyr spesifikke funksjoner, konkret:
+og spesielt kan dere lese om hvordan en metode/funksjon kan kjøres i en egen tråd her:
 
-- Alle enheter skal minst følgende attributter: `id`, `supplier`, `model_name` som inneholder den tekniske identifikatoren,
-  produsentnavn og modellnavn
-- Alle enheter skal minst tilbyr følgende metoder: `is_actuator()`, `is_sensor()`, og `get_device_type()`. Førstnevnte 
- returnerer en boolsk verdi som gir uttrykk for om enheten er en aktuator eller en sensor. Sistnevnte funksjon returnerer en 
- tekst (`str`) som beskriver hva konkret type enhet det er, f.eks `Heat Pump`, `Smart Lock`, osv.
-- Alle sensorer skal tilby en metode `last_measurement` som returnerer en objekt av type `Measurement`. Målenheten i målingen
- skal samsvare med måleenheten av sensoren (f.eks. måler en temperaturmåler in enheten celsius: `"°C"`). For verdien kan du velge 
- en helt tilfeldig numerisk verdi (du kan f.eks. bruke [random modulen](https://docs.python.org/3/library/random.html)) og `timestamp`
- skal være en tekstuell representasjon av et tidspunkt (du kan f.eks. bruke [ISO-8601](https://en.wikipedia.org/wiki/ISO_8601)).
-- Alle aktuatorer skal tilby metodene: `turn_on()`, `turn_off()`, `is_active()`. Sistnevnte skal returnere `True` hvis enheten har blitt slått 
- på med `turn_on()`. Tar også hensyn til at visse aktuatorer kan også gis et "`target_value`" (f.eks. panelovn eller varmepumper kan settes til en ønsket temperatur).
+https://superfastpython.com/threading-in-python/#Example_of_Running_a_Function_in_a_Thread
 
-Ta gjerne en titt i [testfilen](https://github.com/selabhvl/ing301-projectpartA-startcode/blob/main/tests/test_part_a.py) for å sjekke hvilke funksjoner forventes av deres domenemodell.
+## Test av systemet
 
+Test systemet ved å kjøre sky-tjenesten sammen med klient-applikasjonene:
+
+- Sjekk at når tilstand for lyspæren endres i dashboard så endres også tilstanden i smarthuset
+- Sjekk at når temperaturen ender seg i smarthuset så endres også temperatur i dashboard etter trykk på Refresh-knappen.
+
+## Levering av prosjekt
+
+Følgende skal leveres
+
+- Linke til github repository med implemetasjon av tjenesten
+
+## Videre arbeid
+
+Smarthus prosjketet kan utvikles videre i ulike retninger for de som måtte a lyst til dette
+
+- Sette opp eks. Arduino/Raspberry Pi enheter for å få faktiske fysiske sensorer og aktuatorer
+- Generalisere dashboard slik det kan lese inn en konfigurasjon av enheter fra sky-tjenesten
+- Utvikle protokoll for registering av nye enheter i smarthuset
+- Digital tvilling som viser romslig plassering av enheter samt målinger og tilstander
+- Legge til sikkerhet
+- Sette sky-tjenesten i drift på Azure, AWS, GCP eller tilsvarende
